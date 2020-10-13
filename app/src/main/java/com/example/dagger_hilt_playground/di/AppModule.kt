@@ -31,10 +31,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit() : Retrofit =
+    fun provideRetrofit(client: OkHttpClient) : Retrofit =
          Retrofit.Builder()
              .baseUrl(BASE_URL)
              .addConverterFactory(GsonConverterFactory.create())
+             .client(client)
              .build()
 
     @Provides
