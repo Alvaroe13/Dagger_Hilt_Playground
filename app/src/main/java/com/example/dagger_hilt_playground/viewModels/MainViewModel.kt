@@ -4,10 +4,15 @@ import android.content.Context
 import android.util.Log
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.dagger_hilt_playground.model.RecipeResponse
 import com.example.dagger_hilt_playground.repository.MainRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
 
 private const val TAG = "MainViewModel"
 
@@ -17,18 +22,24 @@ class MainViewModel @ViewModelInject constructor(
     @Assisted private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
+    val recipeListResponse: MutableLiveData<RecipeResponse> = MutableLiveData()
+
     init {
         Log.d(TAG, " init called ")
     }
 
-    fun getHello() : String {
-        Log.d(TAG, "getHello: called")
-        val hello = repository.getHello()
-        return  hello
+    fun getRecipeList( recipeCategory: String , page : Int) = viewModelScope.launch(IO) {
+
+        val apiResponse = repository.getRecipeList(recipeCategory, page)
+        if(apiResponse.isSuccessful){
+            apiResponse.let {
+                Log.d(TAG, "getRecipeList: response body = ${apiResponse.body()?.recipes?.size}")
+                recipeListResponse.postValue(it.body())
+            }
+        } else{
+            Log.d(TAG, "getRecipeList: response not successful")
+        }
+        
     }
 
-    fun getContent() :String {
-        val content = repository.getContent()
-        return content
-    }
 }

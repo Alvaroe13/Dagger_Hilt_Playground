@@ -1,18 +1,21 @@
 package com.example.dagger_hilt_playground.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import com.example.dagger_hilt_playground.R
 import com.example.dagger_hilt_playground.viewModels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_main.*
 
 private const val TAG = "MainActivityView"
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    private val category = "Chicken"
+    private val page = 1
 
     private val viewModel : MainViewModel by viewModels()
 
@@ -20,14 +23,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Log.d(TAG, "onCreate: init")
-        val hello = viewModel.getHello()
-        val content = viewModel.getContent()
-        Log.d(TAG, "onCreate:  hello = $hello")
-        Log.d(TAG, "onCreate: content = $content")
+        Log.d(TAG, "onCreate: called!")
+        viewModel.getRecipeList(category, page)
+        initObserver()
+    }
 
-        tvHelloMessage.text = hello
-        tvContentMessage.text = content
+    private fun initObserver() {
+        viewModel.recipeListResponse.observe(this , Observer {
+            Log.d(TAG, "initObserver: response = ${it.recipes.size}")
+        })
     }
 
 }
