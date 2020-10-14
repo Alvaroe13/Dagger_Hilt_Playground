@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.dagger_hilt_playground.model.Recipe
 import com.example.dagger_hilt_playground.model.RecipeResponse
 import com.example.dagger_hilt_playground.repository.MainRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -23,6 +24,7 @@ class MainViewModel @ViewModelInject constructor(
 ) : ViewModel() {
 
     val recipeListResponse: MutableLiveData<RecipeResponse> = MutableLiveData()
+    val recipeFromCache : MutableLiveData<Recipe> = MutableLiveData()
 
     init {
         Log.d(TAG, " init called ")
@@ -40,6 +42,23 @@ class MainViewModel @ViewModelInject constructor(
             Log.d(TAG, "getRecipeList: response not successful")
         }
         
+    }
+
+    //------------------------cache------------------------------------//
+
+    fun insertRecipe( recipe: Recipe) = viewModelScope.launch(IO) {
+
+        Log.d(TAG, "insertRecipe: called")
+        Log.d(TAG, "insertRecipe: recipe inserted =${recipe.title}")
+        repository.insertRecipe(recipe)
+
+    }
+
+    fun getRecipe() = viewModelScope.launch(IO) {
+        Log.d(TAG, "getRecipe: called")
+        val recipeListFetched = repository.getRecipeFromCache()
+        recipeFromCache.postValue(recipeListFetched[0])
+        Log.d(TAG, "getRecipe:  recipe fetched = ${recipeListFetched[0]}")
     }
 
 }
